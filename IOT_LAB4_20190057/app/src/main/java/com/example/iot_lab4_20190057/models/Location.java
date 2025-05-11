@@ -1,7 +1,12 @@
 package com.example.iot_lab4_20190057.models;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Location {
+    // Manejar el ID como String en lugar de long
+    @SerializedName("id")
     private String id;
+
     private String name;
     private String region;
     private String country;

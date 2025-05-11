@@ -1,7 +1,12 @@
 package com.example.iot_lab4_20190057.models;
 
+import com.google.gson.annotations.SerializedName;
+
 public class LocationModel {
-    private String id;
+    // Cambiar el tipo de String a long para manejar IDs numéricos
+    @SerializedName("id")
+    private long id;
+
     private String name;
     private String region;
     private String country;
@@ -9,12 +14,12 @@ public class LocationModel {
     private double lon;
     private String url;
 
-    // Getters y setters
-    public String getId() {
+    // Getters y setters con el nuevo tipo long para id
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 

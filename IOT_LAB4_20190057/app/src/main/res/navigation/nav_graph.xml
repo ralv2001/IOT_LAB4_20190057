@@ -1,34 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/locationsFragment">
 
     <fragment
         android:id="@+id/locationsFragment"
         android:name="com.example.iot_lab4_20190057.fragments.LocationsFragment"
-        android:label="Location Fragment">
+        android:label="LocationsFragment"
+        tools:layout="@layout/fragment_locations">
         <action
             android:id="@+id/action_locations_to_forecast"
-            app:destination="@id/forecastFragment"
-            app:popUpTo="@id/locationsFragment"
-            app:popUpToInclusive="false" />
+            app:destination="@id/forecastFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/forecastFragment"
         android:name="com.example.iot_lab4_20190057.fragments.ForecastFragment"
-        android:label="Forecast Fragment">
-        <argument
-            android:name="locationId"
-            app:argType="string"
-            app:nullable="true"
-            android:defaultValue="null" />
-    </fragment>
+        android:label="ForecastFragment"
+        tools:layout="@layout/fragment_forecast" />
 
     <fragment
         android:id="@+id/futureFragment"
         android:name="com.example.iot_lab4_20190057.fragments.FutureFragment"
-        android:label="Future Fragment" />
-
+        android:label="FutureFragment"
+        tools:layout="@layout/fragment_future" />
 </navigation>

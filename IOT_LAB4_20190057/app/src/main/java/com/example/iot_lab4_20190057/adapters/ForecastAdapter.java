@@ -83,7 +83,30 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         }
 
         public void bind(Forecastday forecast, String locationName, String locationId) {
-            Log.e("ForecastViewHolder", "Binding forecast: " + locationId + " - " + locationName + " - " + forecast);
+            // Agregar validación y logging mejorado
+            if (forecast == null || forecast.getDay() == null) {
+                Log.e("ForecastViewHolder", "Invalid forecast data - forecast or day is null");
+                return;
+            }
+
+            if (forecast.getDay().getCondition() == null) {
+                Log.e("ForecastViewHolder", "Invalid forecast data - condition is null");
+                return;
+            }
+
+            if (locationName == null || locationName.trim().isEmpty()) {
+                Log.w("ForecastViewHolder", "Empty location name, using placeholder");
+                locationName = "Ubicación Desconocida";
+            }
+
+            if (locationId == null || locationId.trim().isEmpty()) {
+                Log.w("ForecastViewHolder", "Empty location ID, using placeholder");
+                locationId = "ID no disponible";
+            }
+
+            Log.d("ForecastViewHolder", "Binding forecast - Location: " + locationName + ", ID: " + locationId);
+
+            // Solo proceder si todos los datos son válidos
             tvDate.setText(forecast.getDate());
             tvLocation.setText(locationName);
             tvLocationId.setText("ID: " + locationId);

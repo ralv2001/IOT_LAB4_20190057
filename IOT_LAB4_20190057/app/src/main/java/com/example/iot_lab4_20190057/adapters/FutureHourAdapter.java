@@ -1,5 +1,6 @@
 package com.example.iot_lab4_20190057.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,13 +81,36 @@ public class FutureHourAdapter extends RecyclerView.Adapter<FutureHourAdapter.Fu
         }
 
         public void bind(FutureHour hour, String locationName, String locationId) {
-            // Formatear la hora (extraer solo la hora del formato YYYY-MM-DD HH:mm)
+            // Validación y formateo seguro
+            if (hour == null || hour.getCondition() == null) {
+                Log.e("FutureHourAdapter", "Invalid hour data");
+                return;
+            }
+
+            // Formatear la hora con validación
             String time = hour.getTime();
-            String hourOnly = time.split(" ")[1]; // Obtener solo la parte de la hora
+            String hourOnly = "";
+            if (time != null && time.contains(" ")) {
+                String[] parts = time.split(" ");
+                if (parts.length > 1) {
+                    hourOnly = parts[1];
+                }
+            }
+
+            // Manejar datos nulos o vacíos
+            if (locationName == null || locationName.trim().isEmpty()) {
+                locationName = "Ubicación Desconocida";
+            }
+
+            if (locationId == null || locationId.trim().isEmpty()) {
+                locationId = "ID no disponible";
+            }
 
             tvTime.setText(hourOnly);
             tvLocation.setText(locationName);
             tvLocationId.setText("ID: " + locationId);
+
+
             tvTemp.setText(String.format("%.1f°C", hour.getTemp_c()));
             tvCondition.setText(hour.getCondition().getText());
             tvHumidity.setText(String.format("Humedad: %d%%", hour.getHumidity()));

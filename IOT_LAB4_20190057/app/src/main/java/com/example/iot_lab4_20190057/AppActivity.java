@@ -40,6 +40,8 @@ public class AppActivity extends AppCompatActivity {
 
         // Configurar el botón de ubicaciones como seleccionado por defecto
         updateButtonSelection(0);
+
+        // NO debe haber código adicional aquí que navegue automáticamente
     }
 
     private void setupNavigationButtons() {

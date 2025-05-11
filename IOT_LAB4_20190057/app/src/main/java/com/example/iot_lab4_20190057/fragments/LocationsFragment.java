@@ -66,9 +66,20 @@ public class LocationsFragment extends Fragment {
 
     private void setupRecyclerView(List<LocationModel> locations) {
         adapter = new LocationAdapter(locations, location -> {
+            // Validar que la ubicación sea válida
+            if (location == null || location.getId() == 0) {
+                Log.e("LocationsFragment", "Invalid location data");
+                Toast.makeText(getContext(), "Error: Datos de ubicación inválidos", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             // Navegar al fragmento de pronósticos pasando el ID de la locación
             Bundle args = new Bundle();
-            args.putString("locationId", "id:" + location.getId());
+            String locationId = "id:" + String.valueOf(location.getId());
+            args.putString("locationId", locationId);
+
+            Log.d("LocationsFragment", "Navigating with locationId: " + locationId);
+
             Navigation.findNavController(getView())
                     .navigate(R.id.action_locations_to_forecast, args);
             // Actualizamos el botón de menú seleccionado
