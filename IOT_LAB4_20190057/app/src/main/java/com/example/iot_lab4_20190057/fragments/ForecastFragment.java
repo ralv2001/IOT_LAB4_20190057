@@ -62,12 +62,14 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
     // Variable para guardar el ID original
     private String originalLocationId = null;
 
+    // Para manejar la intermitencia de CDN
+    private int retryCount = 0;
+    private static final int MAX_RETRIES = 3;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView called");
-        // Agregar este log para detectar llamadas inesperadas
-        Log.d(TAG, "StackTrace: " + Arrays.toString(Thread.currentThread().getStackTrace()));
         return inflater.inflate(R.layout.fragment_forecast, container, false);
     }
 
@@ -77,7 +79,7 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
         Log.d(TAG, "onViewCreated called");
 
         initializeViews(view);
-        setupEmptyRecyclerView(); // Configurar RecyclerView vacío por defecto
+        setupEmptyRecyclerView();
         setupWeatherApi();
         setupAccelerometer();
         checkForNavigationArguments();
@@ -88,7 +90,6 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume called");
-        // Registrar el listener del acelerómetro
         if (accelerometer != null) {
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         }
@@ -98,7 +99,6 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
     public void onPause() {
         super.onPause();
         Log.d(TAG, "onPause called");
-        // Desregistrar el listener del acelerómetro
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
         }
@@ -108,12 +108,11 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
     public void onDestroyView() {
         super.onDestroyView();
         Log.d(TAG, "onDestroyView called");
-        // Asegurarse de desregistrar el listener
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
         }
-        adapter = null; // Limpiar referencia del adaptador
-        hasLoadedData = false; // Resetear la bandera
+        adapter = null;
+        hasLoadedData = false;
     }
 
     private void initializeViews(View view) {
@@ -126,7 +125,6 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
 
     private void setupEmptyRecyclerView() {
         Log.d(TAG, "setupEmptyRecyclerView called");
-        // Configurar RecyclerView vacío
         adapter = new ForecastAdapter(new ArrayList<>(), "", "");
         recyclerForecast.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerForecast.setAdapter(adapter);
@@ -134,19 +132,32 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
 
     private void setupRecyclerView(ForecastResponse forecast) {
         Log.d(TAG, "setupRecyclerView called with forecast for location: " + forecast.getLocation().getName());
+
+        // Obtener el ID procesado
+        String locationName = forecast.getLocation().getName();
+        String locationId = forecast.getLocation().getId();
+
+        // Aplicar la misma lógica que usamos en onResponse para el ID
+        if (locationId == null || locationId.trim().isEmpty()) {
+            if (originalLocationId != null && originalLocationId.startsWith("id:")) {
+                locationId = originalLocationId.substring(3); // Remueve "id:" para obtener solo el número
+                Log.d(TAG, "Using processed location ID for adapter: " + locationId);
+            } else {
+                locationId = "ID no disponible";
+            }
+        }
+
         if (adapter != null) {
-            // Si ya existe un adaptador, actualizar sus datos
             adapter.updateData(
                     forecast.getForecast().getForecastday(),
-                    forecast.getLocation().getName(),
-                    forecast.getLocation().getId()
+                    locationName,
+                    locationId // Usar el ID procesado aquí
             );
         } else {
-            // Crear nuevo adaptador
             adapter = new ForecastAdapter(
                     forecast.getForecast().getForecastday(),
-                    forecast.getLocation().getName(),
-                    forecast.getLocation().getId()
+                    locationName,
+                    locationId // Usar el ID procesado aquí
             );
             recyclerForecast.setLayoutManager(new LinearLayoutManager(getContext()));
             recyclerForecast.setAdapter(adapter);
@@ -160,10 +171,8 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
 
     private void setupAccelerometer() {
         Log.d(TAG, "setupAccelerometer called");
-        // Obtener el SensorManager
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
 
-        // Obtener el sensor del acelerómetro
         if (sensorManager != null) {
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
@@ -201,12 +210,10 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
             String locationId = getArguments().getString("locationId");
             Log.d(TAG, "locationId from arguments: " + locationId);
 
-            // Validar que el locationId sea un ID válido y no esté vacío
             if (locationId != null && !locationId.isEmpty() && !locationId.equals("null") && !hasLoadedData) {
-                // Verificar que tenga el formato correcto 'id:número'
                 if (locationId.startsWith("id:") && locationId.length() > 3) {
                     Log.d(TAG, "Valid locationId found, loading data automatically");
-                    originalLocationId = locationId; // Guardar el ID original
+                    originalLocationId = locationId;
                     etIdLocation.setText(locationId);
                     etDiasForecast.setText("14");
                     getForecast(locationId, 14);
@@ -214,7 +221,6 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
                     getArguments().clear();
                 } else {
                     Log.e(TAG, "Invalid locationId format: " + locationId);
-                    // Limpiar argumentos inválidos
                     getArguments().clear();
                 }
             } else {
@@ -237,7 +243,6 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
                 try {
                     int days = Integer.parseInt(daysStr);
                     if (days > 0 && days <= 14) {
-                        // Verificar si el ID tiene el formato correcto
                         String searchQuery = idLocation;
                         if (!idLocation.startsWith("id:")) {
                             searchQuery = "id:" + idLocation;
@@ -260,12 +265,8 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
 
     private void getForecast(String locationId, int days) {
         Log.d(TAG, "getForecast called with locationId: " + locationId + ", days: " + days);
-        Log.d(TAG, "Using API_KEY: " + API_KEY.substring(0, 8) + "...");
-        Log.d(TAG, "Full URL: forecast.json?key=HIDDEN&q=" + locationId + "&days=" + days);
 
-        Log.d(TAG, "getForecast called with locationId: " + locationId + ", days: " + days);
-
-        // Verificar conexión a Internet antes de hacer la llamada
+        // Verificar conexión a Internet
         if (!checkInternetConnection()) {
             return;
         }
@@ -284,8 +285,24 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
             return;
         }
 
+        // Guardar el ID original para usar después
+        originalLocationId = locationId;
+
         btnBuscarForecast.setEnabled(false);
         btnBuscarForecast.setText("Buscando...");
+
+        // Log de detalles antes de la llamada
+        Log.d(TAG, "=== API CALL DETAILS ===");
+        Log.d(TAG, "Base URL: https://api.weatherapi.com/v1/");
+        Log.d(TAG, "Endpoint: forecast.json");
+        Log.d(TAG, "API Key: " + API_KEY.substring(0, 8) + "...[HIDDEN]");
+        Log.d(TAG, "Query Parameters:");
+        Log.d(TAG, "  - key: [HIDDEN]");
+        Log.d(TAG, "  - q: " + locationId);
+        Log.d(TAG, "  - days: " + days);
+        Log.d(TAG, "Full URL (aproximado): https://api.weatherapi.com/v1/forecast.json?key=[HIDDEN]&q=" + locationId + "&days=" + days);
+        Log.d(TAG, "Retry count: " + retryCount);
+        Log.d(TAG, "========================");
 
         weatherApi.getForecast(API_KEY, locationId, days).enqueue(new Callback<ForecastResponse>() {
             @Override
@@ -294,12 +311,33 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
                 btnBuscarForecast.setEnabled(true);
                 btnBuscarForecast.setText("Buscar");
 
-                Log.d(TAG, "API Response received - Success: " + response.isSuccessful());
+                Log.d(TAG, "=== API RESPONSE DETAILS ===");
+                Log.d(TAG, "Response Code: " + response.code());
+                Log.d(TAG, "Response Message: " + response.message());
+                Log.d(TAG, "Response Success: " + response.isSuccessful());
+
+                // Log headers importantes para el debug de CDN
+                Log.d(TAG, "Important CDN headers:");
+                Log.d(TAG, "  cdn-cache: " + response.headers().get("cdn-cache"));
+                Log.d(TAG, "  cdn-status: " + response.headers().get("cdn-status"));
+                Log.d(TAG, "  x-weatherapi-qpm-left: " + response.headers().get("x-weatherapi-qpm-left"));
 
                 if (response.isSuccessful() && response.body() != null) {
                     ForecastResponse forecast = response.body();
 
-                    // Validación mejorada de los datos
+                    // Log detalles de la respuesta exitosa
+                    Log.d(TAG, "SUCCESS - Forecast Data Received");
+                    if (forecast.getLocation() != null) {
+                        Log.d(TAG, "Location Name: " + forecast.getLocation().getName());
+                        Log.d(TAG, "Location ID: " + forecast.getLocation().getId());
+                        Log.d(TAG, "Location Country: " + forecast.getLocation().getCountry());
+                        Log.d(TAG, "Location Region: " + forecast.getLocation().getRegion());
+                    }
+
+                    // AQUÍ ES DONDE DEBES LLAMAR A validateForecastResponse
+                    validateForecastResponse(forecast);
+
+                    // Validación de datos
                     if (forecast.getLocation() != null &&
                             forecast.getForecast() != null &&
                             forecast.getForecast().getForecastday() != null &&
@@ -313,40 +351,71 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
                             locationName = "Ubicación Desconocida";
                         }
 
-                        // Si el ID viene null desde la API, usamos el ID original sin el prefijo "id:"
+                        // FIX: La API NO devuelve el ID cuando haces query por ID
+                        // Usamos el ID original que guardamos antes
                         if (locationId == null || locationId.trim().isEmpty()) {
-                            // Extraer el ID del campo de búsqueda que ya tiene el formato "id:número"
-                            String currentText = etIdLocation.getText().toString().trim();
-                            if (currentText.startsWith("id:") && currentText.length() > 3) {
-                                locationId = currentText.substring(3); // Remueve "id:" para obtener solo el número
+                            // Extraer el ID del originalLocationId
+                            if (originalLocationId != null && originalLocationId.startsWith("id:")) {
+                                locationId = originalLocationId.substring(3); // Remueve "id:" para obtener solo el número
+                                Log.d(TAG, "Using original location ID: " + locationId);
                             } else {
                                 locationId = "ID no disponible";
                             }
                         }
 
                         Log.d(TAG, "Valid forecast data received - Location: " + locationName + ", ID: " + locationId);
-
-                        Log.d(TAG, "Valid forecast data received for: " + forecast.getLocation().getName());
                         setupRecyclerView(forecast);
                         recyclerForecast.scrollToPosition(0);
+
+                        // Reset retry count on success
+                        retryCount = 0;
+
                     } else {
                         Log.e(TAG, "Invalid forecast data received");
-                        if (forecast.getLocation() != null) {
-                            Log.e(TAG, "Location name: " + forecast.getLocation().getName());
-                            Log.e(TAG, "Location ID: " + forecast.getLocation().getId());
-                        }
                         Toast.makeText(getContext(), "Datos de pronóstico inválidos recibidos", Toast.LENGTH_SHORT).show();
+
+                        // Reset retry count
+                        retryCount = 0;
+                    }
+                } else if (response.code() == 502) {
+                    // Handle 502 specifically - retry logic
+                    Log.e(TAG, "CDN Gateway error - attempting retry");
+
+                    if (retryCount < MAX_RETRIES) {
+                        retryCount++;
+                        Toast.makeText(getContext(),
+                                "Problema temporal con el servidor. Reintentando... (" + retryCount + "/" + MAX_RETRIES + ")",
+                                Toast.LENGTH_SHORT).show();
+
+                        // Retry after a short delay
+                        new android.os.Handler().postDelayed(() -> {
+                            getForecast(originalLocationId, days);
+                        }, 2000);
+                    } else {
+                        retryCount = 0;
+                        Toast.makeText(getContext(),
+                                "Servidor temporalmente no disponible. Por favor, intente más tarde.",
+                                Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    Log.e(TAG, "API Error - Code: " + response.code());
+                    // Logging detallado del error
+                    Log.e(TAG, "ERROR - API Call Failed");
+                    Log.e(TAG, "Error Code: " + response.code());
+                    Log.e(TAG, "Error Message: " + response.message());
+
+                    // Reset retry count
+                    retryCount = 0;
+
+                    // Manejo de errores según código
                     if (response.code() == 400) {
                         Toast.makeText(getContext(), "ID de ubicación no válido. Use el formato 'id:número'",
                                 Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(getContext(), "Error al obtener pronósticos",
+                        Toast.makeText(getContext(), "Error al obtener pronósticos (Código: " + response.code() + ")",
                                 Toast.LENGTH_SHORT).show();
                     }
                 }
+                Log.d(TAG, "=========================");
             }
 
             @Override
@@ -354,7 +423,20 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
                 btnBuscarForecast.setEnabled(true);
                 btnBuscarForecast.setText("Buscar");
 
-                Log.e(TAG, "API Call failed: " + t.getClass().getSimpleName() + " - " + t.getMessage());
+                Log.e(TAG, "=== API CALL FAILURE DETAILS ===");
+                Log.e(TAG, "Exception Type: " + t.getClass().getName());
+                Log.e(TAG, "Exception Message: " + t.getMessage());
+
+                // Log la request que falló
+                if (call.request() != null) {
+                    Log.e(TAG, "Failed Request URL: " + call.request().url());
+                    Log.e(TAG, "Failed Request Method: " + call.request().method());
+                }
+
+                Log.e(TAG, "===========================");
+
+                // Reset retry count
+                retryCount = 0;
 
                 // Mensaje más específico según el tipo de error
                 String errorMessage;
@@ -404,6 +486,7 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
 
     private void showShakeDialog() {
         Log.d(TAG, "showShakeDialog called");
+
         // Verificar si hay datos para eliminar
         if (adapter == null || adapter.getItemCount() == 0) {
             Toast.makeText(getContext(), "No hay pronósticos para eliminar",
@@ -433,5 +516,48 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
                 })
                 .setCancelable(true)
                 .show();
+    }
+
+    private void validateForecastResponse(ForecastResponse forecast) {
+        Log.d(TAG, "=== VALIDATING FORECAST RESPONSE ===");
+
+        if (forecast == null) {
+            Log.e(TAG, "Forecast is NULL");
+            return;
+        }
+
+        Log.d(TAG, "Location: " + (forecast.getLocation() != null ? "OK" : "NULL"));
+        if (forecast.getLocation() != null) {
+            Log.d(TAG, "  - Name: " + (forecast.getLocation().getName() != null ? forecast.getLocation().getName() : "NULL"));
+            Log.d(TAG, "  - ID: " + (forecast.getLocation().getId() != null ? forecast.getLocation().getId() : "NULL"));
+
+            // Log adicional para el problema del ID
+            if (forecast.getLocation().getId() == null) {
+                Log.w(TAG, "  - API BUG: Location ID is NULL when querying by ID");
+                Log.w(TAG, "  - Using original locationId as fallback");
+            }
+        }
+
+        Log.d(TAG, "Forecast: " + (forecast.getForecast() != null ? "OK" : "NULL"));
+        if (forecast.getForecast() != null) {
+            Log.d(TAG, "  - Forecastday: " + (forecast.getForecast().getForecastday() != null ? "OK" : "NULL"));
+            if (forecast.getForecast().getForecastday() != null) {
+                Log.d(TAG, "  - Forecastday Count: " + forecast.getForecast().getForecastday().size());
+
+                // Validar primer día del forecast
+                if (!forecast.getForecast().getForecastday().isEmpty()) {
+                    var firstDay = forecast.getForecast().getForecastday().get(0);
+                    Log.d(TAG, "  - First Day Date: " + (firstDay.getDate() != null ? firstDay.getDate() : "NULL"));
+                    Log.d(TAG, "  - First Day Data: " + (firstDay.getDay() != null ? "OK" : "NULL"));
+
+                    if (firstDay.getDay() != null) {
+                        Log.d(TAG, "    - Condition: " + (firstDay.getDay().getCondition() != null ?
+                                firstDay.getDay().getCondition().getText() : "NULL"));
+                    }
+                }
+            }
+        }
+
+        Log.d(TAG, "================================");
     }
 }
