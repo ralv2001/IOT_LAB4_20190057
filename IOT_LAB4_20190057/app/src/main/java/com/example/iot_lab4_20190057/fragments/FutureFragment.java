@@ -50,6 +50,7 @@ public class FutureFragment extends Fragment {
     private RecyclerView recyclerFuture;
     private FutureHourAdapter adapter;
     private WeatherApi weatherApi;
+    private String originalLocationId = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -162,6 +163,9 @@ public class FutureFragment extends Fragment {
         btnBuscarFuture.setEnabled(false);
         btnBuscarFuture.setText("Buscando...");
 
+        // Guardar el ID original para usar después
+        originalLocationId = locationId;
+
         weatherApi.getFutureWeather(API_KEY, locationId, date).enqueue(new Callback<FutureResponse>() {
             @Override
             public void onResponse(@NonNull Call<FutureResponse> call,
@@ -181,11 +185,24 @@ public class FutureFragment extends Fragment {
                             // Convertir el array a lista
                             List<FutureHour> hoursList = Arrays.asList(forecastDay.getHour());
 
+                            // Procesar el ID de la ubicación
+                            String locationName = futureResponse.getLocation().getName();
+                            String locationId = futureResponse.getLocation().getId();
+
+                            // Si el ID de la respuesta es nulo o vacío, usar el ID original
+                            if (locationId == null || locationId.trim().isEmpty()) {
+                                if (originalLocationId != null && originalLocationId.startsWith("id:")) {
+                                    locationId = originalLocationId.substring(3); // Remueve "id:" para obtener solo el número
+                                } else {
+                                    locationId = "ID no disponible";
+                                }
+                            }
+
                             // Actualizar el RecyclerView con los resultados
                             adapter.updateData(
                                     hoursList,
-                                    futureResponse.getLocation().getName(),
-                                    futureResponse.getLocation().getId()
+                                    locationName,
+                                    locationId  // Usar el ID procesado
                             );
 
                             // Opcional: Desplazarse al inicio de la lista
