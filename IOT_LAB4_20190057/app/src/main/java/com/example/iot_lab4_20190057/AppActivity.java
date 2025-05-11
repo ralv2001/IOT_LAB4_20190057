@@ -23,25 +23,17 @@ public class AppActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app);
 
-        // Configurar Navigation Component
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_container);
         navController = navHostFragment.getNavController();
 
-        // Inicializar botones de navegación
         btnLocations = findViewById(R.id.btn_locations);
         btnPronosticos = findViewById(R.id.btn_pronosticos);
         btnFuturo = findViewById(R.id.btn_futuro);
 
         navButtons = new Button[]{btnLocations, btnPronosticos, btnFuturo};
-
-        // Configurar listeners para los botones
         setupNavigationButtons();
-
-        // Configurar el botón de ubicaciones como seleccionado por defecto
         updateButtonSelection(0);
-
-        // NO debe haber código adicional aquí que navegue automáticamente
     }
 
     private void setupNavigationButtons() {

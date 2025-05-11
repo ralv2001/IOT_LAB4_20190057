@@ -17,7 +17,6 @@ public class Day {
     private Condition condition;
     private double uv;
 
-    // Getters y setters
     public double getMaxtemp_c() {
         return maxtemp_c;
     }

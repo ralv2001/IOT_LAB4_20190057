@@ -36,6 +36,8 @@ import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 
+//USO DE CLAUDE (INTELEGENCIA ARTIFICIAL) PARA PARCHEAR BUGS
+
 public class LocationsFragment extends Fragment {
 
     private static final String API_KEY = "ec24b1c6dd8a4d528c1205500250305";

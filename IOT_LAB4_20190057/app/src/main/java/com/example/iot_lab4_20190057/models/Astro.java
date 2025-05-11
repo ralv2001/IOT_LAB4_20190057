@@ -7,7 +7,6 @@ public class Astro {
     private String moonset;
     private String moon_phase;
 
-    // Getters básicos si los necesitas
     public String getSunrise() {
         return sunrise;
     }

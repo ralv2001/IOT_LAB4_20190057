@@ -38,6 +38,8 @@ import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 
+//USO DE CLAUDE (INTELEGENCIA ARTIFICIAL) PARA PARCHEAR BUGS
+
 public class FutureFragment extends Fragment {
 
     private static final String API_KEY = "ec24b1c6dd8a4d528c1205500250305";
@@ -115,7 +117,6 @@ public class FutureFragment extends Fragment {
             }
         });
 
-        // AGREGAR ESTE CÓDIGO NUEVO:
         // Cuando presionan Enter en ambos EditText, ejecutar búsqueda
         TextView.OnEditorActionListener searchActionListener = (v, actionId, event) -> {
             if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH ||

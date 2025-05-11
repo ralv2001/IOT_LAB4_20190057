@@ -7,7 +7,6 @@ public class Current {
     private double temp_f;
     private Condition condition;
 
-    // Getters básicos
     public double getTemp_c() {
         return temp_c;
     }

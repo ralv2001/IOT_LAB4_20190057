@@ -13,6 +13,8 @@ import com.example.iot_lab4_20190057.models.LocationModel;
 
 import java.util.List;
 
+//USO DE CLAUDE (INTELEGENCIA ARTIFICIAL) PARA PARCHEAR BUGS
+
 public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.LocationViewHolder> {
 
     private List<LocationModel> locations;

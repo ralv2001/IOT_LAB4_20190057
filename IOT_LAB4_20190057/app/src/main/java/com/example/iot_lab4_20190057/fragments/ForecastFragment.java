@@ -41,6 +41,8 @@ import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 
+//USO DE CLAUDE (INTELEGENCIA ARTIFICIAL) PARA PARCHEAR BUGS
+
 public class ForecastFragment extends Fragment implements SensorEventListener {
 
     private static final String TAG = "ForecastFragment";

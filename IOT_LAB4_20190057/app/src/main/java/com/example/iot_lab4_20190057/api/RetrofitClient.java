@@ -18,6 +18,7 @@ import okio.Buffer;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+//USO DE CLAUDE (INTELEGENCIA ARTIFICIAL) PARA EL AÑADIDO DE LOGS DE DEBUGS
 public class RetrofitClient {
     private static final String BASE_URL = "https://api.weatherapi.com/v1/";
     private static RetrofitClient instance;

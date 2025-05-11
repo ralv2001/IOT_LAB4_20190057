@@ -20,16 +20,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Validar conexión a Internet inmediatamente al ingresar
         if (!isConnectedToInternet()) {
             mostrarDialogoSinInternet();
-            return; // Evita continuar con la configuración si no hay internet
+            return;
         }
 
-        // Inicializar vistas solo si hay conexión
         btnComenzar = findViewById(R.id.btnComenzar);
 
-        // Configurar listeners
         btnComenzar.setOnClickListener(v -> {
             // Ahora solo redirige a AppActivity sin verificar nuevamente
             Intent intent = new Intent(MainActivity.this, AppActivity.class);
@@ -38,9 +35,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Método para verificar si hay conexión a Internet
-     */
+
     private boolean isConnectedToInternet() {
         ConnectivityManager connectivityManager =
                 (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
@@ -48,22 +43,17 @@ public class MainActivity extends AppCompatActivity {
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
-    /**
-     * Mostrar diálogo cuando no hay conexión a Internet
-     */
+
     private void mostrarDialogoSinInternet() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Sin conexión a Internet")
                 .setMessage("No tienes conexión a Internet. Por favor, verifica tu conexión.")
                 .setPositiveButton("Configuración", (dialog, which) -> {
-                    // Redirigir a ajustes del dispositivo
                     Intent intent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
                     startActivity(intent);
-                    // Cerrar la aplicación ya que no hay conexión
                     finish();
                 })
                 .setNegativeButton("Cancelar", (dialog, which) -> {
-                    // Cerrar la aplicación ya que no hay conexión
                     finish();
                 })
                 .setCancelable(false)
