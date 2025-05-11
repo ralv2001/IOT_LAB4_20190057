@@ -2,6 +2,7 @@
 Este es mi laboratorio 4 :)
 
 ## 🚨 **Importante: LEER TODO ANTES DE REVISAR EL PROYECTO**
+Por favor, si los datos no cargan (se selecciona una ciudad y no carga), simplmenente esperar, el código está hecho para que se haga unos cuantos reintentos y al cabo de unos segundos ya muestre la información
 
 ### 🛠️ Desafíos en la Implementación y Soluciones
 
