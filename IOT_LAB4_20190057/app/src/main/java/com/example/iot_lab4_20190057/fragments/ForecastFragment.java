@@ -8,6 +8,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,7 +63,7 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
         super.onViewCreated(view, savedInstanceState);
 
         initializeViews(view);
-        setupRecyclerView();
+        // setupRecyclerView();
         setupWeatherApi();
         setupAccelerometer();
         checkForNavigationArguments();
@@ -103,8 +104,12 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
         recyclerForecast = view.findViewById(R.id.recycler_forecast);
     }
 
-    private void setupRecyclerView() {
-        adapter = new ForecastAdapter(new ArrayList<>(), "", "");
+    private void setupRecyclerView(ForecastResponse forecast) {
+        adapter = new ForecastAdapter(
+                forecast.getForecast().getForecastday(), // Lista de datos
+                forecast.getLocation().getName(), // Nombre de la ubicación
+                forecast.getLocation().getId() // ID de la ubicación
+        );
         recyclerForecast.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerForecast.setAdapter(adapter);
     }
@@ -138,6 +143,7 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
                 etDiasForecast.setText("14");
                 // Buscar automáticamente
                 getForecast(locationId, 14);
+                getArguments().remove("locationId");
             }
         }
     }
@@ -189,7 +195,8 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
                             forecast.getForecast().getForecastday() != null &&
                             !forecast.getForecast().getForecastday().isEmpty()) {
 
-                        // Actualizar el RecyclerView con los resultados
+                        setupRecyclerView(forecast);
+                        /* // Actualizar el RecyclerView con los resultados
                         adapter.updateData(
                                 forecast.getForecast().getForecastday(),
                                 forecast.getLocation().getName(),
@@ -197,7 +204,7 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
                         );
 
                         // Opcional: Desplazarse al inicio de la lista
-                        recyclerForecast.scrollToPosition(0);
+                        recyclerForecast.scrollToPosition(0); */
                     } else {
                         Toast.makeText(getContext(), "No hay datos de pronóstico disponibles",
                                 Toast.LENGTH_SHORT).show();

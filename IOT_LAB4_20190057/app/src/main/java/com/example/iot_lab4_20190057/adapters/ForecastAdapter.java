@@ -1,5 +1,6 @@
 package com.example.iot_lab4_20190057.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,6 +83,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         }
 
         public void bind(Forecastday forecast, String locationName, String locationId) {
+            Log.e("ForecastViewHolder", "Binding forecast: " + locationId + " - " + locationName + " - " + forecast);
             tvDate.setText(forecast.getDate());
             tvLocation.setText(locationName);
             tvLocationId.setText("ID: " + locationId);

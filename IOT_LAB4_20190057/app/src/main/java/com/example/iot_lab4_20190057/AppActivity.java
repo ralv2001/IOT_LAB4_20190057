@@ -59,7 +59,7 @@ public class AppActivity extends AppCompatActivity {
         });
     }
 
-    private void updateButtonSelection(int selectedIndex) {
+    public void updateButtonSelection(int selectedIndex) {
         for (int i = 0; i < navButtons.length; i++) {
             if (i == selectedIndex) {
                 navButtons[i].setTextColor(getResources().getColor(R.color.purple_dark, null));

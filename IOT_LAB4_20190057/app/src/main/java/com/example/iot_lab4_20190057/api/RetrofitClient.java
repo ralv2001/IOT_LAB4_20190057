@@ -4,7 +4,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    private static final String BASE_URL = "http://api.weatherapi.com/v1/";
+    private static final String BASE_URL = "https://api.weatherapi.com/v1/";
     private static RetrofitClient instance;
     private Retrofit retrofit;
 
