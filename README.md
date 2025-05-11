@@ -56,7 +56,14 @@ if (locationId == null || locationId.trim().isEmpty()) {
 
 ---
 
-### 📌 Créditos de Diseño
+## **Uso de Inteligencia artificial**
+En este proyecto se usó la inteligencia artificial "Claude", principalemente para el parcheo de bugs, esto implica principalmente los 3 archivos contenidos en cada una de las carpetas "adapters" y "fragments", especialemente en la sección de Navegation en el archivo de LocationsFragment:
+    private void setupRecyclerView(List<LocationModel> locations) {
+        adapter = new LocationAdapter(locations, location -> {
+            ....
+Esto también incluyo el archivo nav_graph.xml, en la carpeta res/navigation/nav_graph.xml. Por último, se utilizó también la IA ChatGpt para que este readme se vea bonito y entendible en la primera parte, que es bastante técnica
+
+### **Créditos de Diseño**
 
 Me parece importante rendir créditos al usuario **Aqsa**, del cual me basé en su diseño en la aplicación *Figma* para este laboratorio.  
 Su modelo del usuario se encuentra en [este enlace de Figma](https://www.figma.com/design/Ax4JWzDUvrlky87CeFgLuk/Weather-app--Community-?node-id=0-1&p=f&t=OfGIq2Rfk3uq7LD2-0).
