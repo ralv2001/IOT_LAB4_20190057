@@ -32,6 +32,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
+import android.widget.TextView;
+
 public class LocationsFragment extends Fragment {
 
     private static final String API_KEY = "ec24b1c6dd8a4d528c1205500250305";
@@ -103,6 +107,24 @@ public class LocationsFragment extends Fragment {
                 Toast.makeText(getContext(), "Por favor ingrese una ubicación",
                         Toast.LENGTH_SHORT).show();
             }
+        });
+
+        // Cuando presionan Enter en el EditText, ejecutar búsqueda
+        etSearchLocation.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH ||
+                    actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE ||
+                    (event != null && event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER)) {
+
+                String query = etSearchLocation.getText().toString().trim();
+                if (!TextUtils.isEmpty(query)) {
+                    searchLocations(query);
+                } else {
+                    Toast.makeText(getContext(), "Por favor ingrese una ubicación",
+                            Toast.LENGTH_SHORT).show();
+                }
+                return true; // Consumir el evento
+            }
+            return false; // No consumir el evento
         });
     }
 

@@ -37,6 +37,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
+import android.widget.TextView;
+
 public class ForecastFragment extends Fragment implements SensorEventListener {
 
     private static final String TAG = "ForecastFragment";
@@ -261,6 +265,22 @@ public class ForecastFragment extends Fragment implements SensorEventListener {
                         Toast.LENGTH_SHORT).show();
             }
         });
+
+        // Cuando presionan Enter en ambos EditText, ejecutar búsqueda
+        TextView.OnEditorActionListener searchActionListener = (v, actionId, event) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH ||
+                    actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE ||
+                    (event != null && event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER)) {
+
+                // Simular click del botón
+                btnBuscarForecast.performClick();
+                return true; // Consumir el evento
+            }
+            return false; // No consumir el evento
+        };
+
+        etIdLocation.setOnEditorActionListener(searchActionListener);
+        etDiasForecast.setOnEditorActionListener(searchActionListener);
     }
 
     private void getForecast(String locationId, int days) {

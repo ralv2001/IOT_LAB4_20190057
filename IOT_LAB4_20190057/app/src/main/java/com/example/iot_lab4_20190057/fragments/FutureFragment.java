@@ -34,6 +34,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
+import android.widget.TextView;
+
 public class FutureFragment extends Fragment {
 
     private static final String API_KEY = "ec24b1c6dd8a4d528c1205500250305";
@@ -110,6 +114,23 @@ public class FutureFragment extends Fragment {
                         Toast.LENGTH_SHORT).show();
             }
         });
+
+        // AGREGAR ESTE CÓDIGO NUEVO:
+        // Cuando presionan Enter en ambos EditText, ejecutar búsqueda
+        TextView.OnEditorActionListener searchActionListener = (v, actionId, event) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH ||
+                    actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE ||
+                    (event != null && event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER)) {
+
+                // Simular click del botón
+                btnBuscarFuture.performClick();
+                return true; // Consumir el evento
+            }
+            return false; // No consumir el evento
+        };
+
+        etIdLocationFuture.setOnEditorActionListener(searchActionListener);
+        etDiaInteres.setOnEditorActionListener(searchActionListener);
     }
 
     private boolean isValidDateFormat(String dateStr) {
