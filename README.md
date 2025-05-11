@@ -27,6 +27,38 @@ if (locationId == null || locationId.trim().isEmpty()) {
     locationId = originalLocationId.substring(3); // Remueve "id:"
 }
 
+
+## 🚨 **Importante: LEER TODO ANTES DE REVISAR EL PROYECTO**
+
+### 🛠️ Desafíos en la Implementación y Soluciones
+
+---
+
+#### ⚠️ Problema 1: Intermitencia del Servicio (Error 502)
+
+Durante el desarrollo se identificó que **WeatherAPI** utiliza **BunnyCDN** como red de distribución de contenido (CDN).  
+Ocasionalmente, el CDN presentó errores **502 (Bad Gateway)** cuando no puede establecer conexión con el servidor de origen.  
+Esto resultó en una **intermitencia**, donde la aplicación funciona correctamente la mayoría de las veces, pero falla esporádicamente con errores del servidor.
+
+> **Nota:** Es posible que la aplicación falle o se cierre repentinamente debido a esto.  
+> Por favor, simplemente vuelve a correr el proyecto si ocurre.
+
+**✅ Solución Implementada:**
+
+Se implementó un sistema de **reintentos automáticos** que detecta específicamente los errores 502 y realiza hasta **3 intentos adicionales** con intervalos de **2 segundos** entre cada uno.  
+Esto permite que la aplicación supere los problemas temporales del CDN.
+
+```java
+if (response.code() == 502) {
+    if (retryCount < MAX_RETRIES) {
+        retryCount++;
+        new Handler().postDelayed(() -> {
+            getForecast(originalLocationId, days);
+        }, 2000);
+    }
+}
+
+
 ## **Uso de Inteligencia artificial**
 En este proyecto se usó la inteligencia artificial "Claude", principalemente para el parcheo de bugs, esto implica principalmente los 3 archivos contenidos en cada una de las carpetas "adapters" y "fragments", especialemente en la sección de Navegation en el archivo de LocationsFragment:
     private void setupRecyclerView(List<LocationModel> locations) {
